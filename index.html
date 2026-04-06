@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeVision | Enterprise Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0f1c 0%, #0c1222 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: floatOrb 20s infinite ease-in-out;
+        }
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+            25% { transform: translate(50px, -30px) scale(1.1); opacity: 0.5; }
+            50% { transform: translate(-30px, 50px) scale(0.9); opacity: 0.4; }
+            75% { transform: translate(40px, 30px) scale(1.05); opacity: 0.45; }
+        }
+        .orb-1 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,255,255,0.4), transparent); top: -150px; right: -150px; }
+        .orb-2 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(42,157,143,0.4), transparent); bottom: -100px; left: -100px; animation-delay: 2s; }
+        .orb-3 { width: 250px; height: 250px; background: radial-gradient(circle, rgba(72,202,228,0.3), transparent); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-duration: 35s; }
+        
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Login Container */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .glass-card {
+            background: rgba(15, 25, 45, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 2.8rem;
+            width: 100%;
+            max-width: 460px;
+            animation: slideUp 0.6s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-icon {
+            background: linear-gradient(135deg, #0ff, #2a9d8f);
+            width: 80px;
+            height: 80px;
+            border-radius: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,255,255,0.3); }
+        }
+        .logo-icon i { font-size: 2.8rem; color: #0a1922; }
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #8db5d6;
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .input-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5f8ab6;
+            font-size: 1.1rem;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(0,255,255,0.2);
+            border-radius: 1.2rem;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #0ff;
+            box-shadow: 0 0 0 4px rgba(0,255,255,0.1);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(95deg, #2a9d8f, #48cae4);
+            border: none;
+            border-radius: 1.2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0a1922;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 0.8rem;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(42,157,143,0.4);
+        }
+        .error-msg {
+            background: rgba(255,80,80,0.2);
+            border: 1px solid #ff5e6e;
+            color: #ffb4a2;
+            padding: 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+        .demo-info {
+            margin-top: 1.8rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(0,255,255,0.2);
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5f7f9e;
+        }
+        .demo-info span {
+            color: #0ff;
+            font-weight: 600;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 5rem 1.8rem 2rem;
+            display: none;
+        }
+        .dashboard-container.active {
+            display: block;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 25, 45, 0.95);
+            backdrop-filter: blur(16px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 1000;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo i {
+            font-size: 1.8rem;
+            color: #0ff;
+        }
+        .logo span {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .user-name {
+            color: #0ff;
+            font-weight: 600;
+        }
+        .logout-btn {
+            background: rgba(255,70,85,0.2);
+            border: 1px solid #ff5e6e;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            color: #ffb4b4;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #ff5e6e;
+            color: white;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(0,255,255,0.12), rgba(42,157,143,0.12));
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,255,255,0.25);
+        }
+        .welcome-banner h2 {
+            color: white;
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+        }
+        .welcome-banner p {
+            color: #8db5d6;
+            font-size: 0.95rem;
+        }
+
+        /* Filters Bar */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(10,20,35,0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 1rem;
+            padding: 1.2rem 1.8rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.4);
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+        }
+        .filter-group label {
+            color: #8db5d6;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        select {
+            background: #0a1428;
+            border: 1px solid #2a9d8f;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .reset-filters {
+            background: #2a9d8f;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .reset-filters:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 10px rgba(42,157,143,0.4);
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: rgba(20,35,55,0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 1.2rem;
+            padding: 1.3rem;
+            border-left: 4px solid #0ff;
+            transition: all 0.3s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30,50,75,0.85);
+        }
+        .kpi-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #7aa2c4;
+            letter-spacing: 1px;
+        }
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            margin-top: 0.5rem;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(15,28,45,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 1.3rem;
+            padding: 1.2rem;
+            border: 1px solid rgba(0,255,255,0.2);
+            transition: all 0.3s;
+        }
+        .chart-card:hover {
+            border-color: rgba(0,255,255,0.4);
+            transform: translateY(-3px);
+        }
+        .chart-card h3 {
+            color: #eef4ff;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        canvas {
+            max-height: 260px;
+            width: 100%;
+        }
+
+        /* Risk Table */
+        .risk-table-wrapper {
+            background: rgba(10,22,40,0.75);
+            border-radius: 1.3rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #e0edf5;
+        }
+        th, td {
+            padding: 1rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,255,255,0.1);
+        }
+        th {
+            color: #0ff;
+            font-weight: 600;
+        }
+        .badge-risk {
+            background: #ff5e6e30;
+            color: #ff9f9f;
+            border-radius: 20px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Additional Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .stat-card {
+            background: rgba(15,28,45,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 1.3rem;
+            padding: 1.2rem;
+            border: 1px solid rgba(0,255,255,0.2);
+        }
+        .stat-card h3 {
+            color: #0ff;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .stat-list {
+            list-style: none;
+        }
+        .stat-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #b0c4de;
+        }
+        .stat-list li span:first-child {
+            font-weight: 500;
+        }
+        .stat-list li span:last-child {
+            color: #0ff;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #5f7f9e;
+            margin-top: 2rem;
+            padding: 1rem;
+            border-top: 1px solid rgba(0,255,255,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; }
+            .dashboard-container { padding-top: 7rem; padding-left: 1rem; padding-right: 1rem; }
+            .kpi-value { font-size: 1.5rem; }
+            .charts-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="bg-animation">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+<div class="grid-overlay"></div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-container">
+    <div class="glass-card">
+        <div style="text-align: center;">
+            <div class="logo-icon">
+                <i class="fas fa-chart-network"></i>
+            </div>
+            <h1>CodeVision</h1>
+            <div class="subtitle">Enterprise Intelligence Platform</div>
+        </div>
+        <form id="loginForm">
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Email address" value="admin@codevision.com" autocomplete="email">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password" value="admin123" autocomplete="current-password">
+            </div>
+            <button type="submit" class="login-btn">
+                <i class="fas fa-arrow-right-to-bracket"></i> Login to Dashboard
+            </button>
+        </form>
+        <div id="errorMsg" class="error-msg"></div>
+        <div class="demo-info">
+            <i class="fas fa-info-circle"></i> Demo credentials pre-filled! Just click <span>Login</span>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="dashboardPage" class="dashboard-container">
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-chart-network"></i>
+            <span>CodeVision Ops</span>
+        </div>
+        <div class="user-info">
+            <i class="fas fa-user-circle" style="color:#0ff; font-size:1.5rem;"></i>
+            <span class="user-name" id="userNameDisplay"></span>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+
+    <div class="welcome-banner">
+        <h2><i class="fas fa-chart-line"></i> Welcome back, <span id="welcomeName"></span>!</h2>
+        <p>Monitor your IT operations, track project performance, and analyze workforce metrics in real-time.</p>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label><i class="fas fa-building"></i> Department</label>
+            <select id="deptFilter">
+                <option value="all">All Departments</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="fas fa-globe"></i> Client Country</label>
+            <select id="clientFilter">
+                <option value="all">All Clients</option>
+            </select>
+        </div>
+        <button class="reset-filters" onclick="resetFilters()"><i class="fas fa-undo-alt"></i> Reset Filters</button>
+    </div>
+
+    <div class="kpi-grid" id="kpiContainer"></div>
+
+    <div class="charts-row">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-bar" style="color:#2a9d8f;"></i> Projects by Client Country</h3>
+            <canvas id="countryChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-line" style="color:#0ff;"></i> Monthly Billable Hours Trend</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie" style="color:#f4a261;"></i> Project Type Distribution</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-exclamation-triangle" style="color:#ff5e6e;"></i> At-Risk Projects (Overrun > 10%)</h3>
+            <div class="risk-table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Project ID</th><th>Project Name</th><th>Client</th><th>Dept</th><th>Overrun%</th></tr>
+                    </thead>
+                    <tbody id="riskTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats Section -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <h3><i class="fas fa-users"></i> Top Performing Departments</h3>
+            <ul class="stat-list" id="topDeptsList">
+                <li><span>UI/UX</span><span>4.8 ⭐</span></li>
+                <li><span>Cloud</span><span>4.6 ⭐</span></li>
+                <li><span>DevOps</span><span>4.5 ⭐</span></li>
+            </ul>
+        </div>
+        <div class="stat-card">
+            <h3><i class="fas fa-clock"></i> Project Health Summary</h3>
+            <ul class="stat-list" id="projectHealthList">
+                <li><span>On Track</span><span>142 Projects</span></li>
+                <li><span>At Risk</span><span>38 Projects</span></li>
+                <li><span>Delayed</span><span>20 Projects</span></li>
+            </ul>
+        </div>
+        <div class="stat-card">
+            <h3><i class="fas fa-dollar-sign"></i> Financial Summary</h3>
+            <ul class="stat-list" id="financialList">
+                <li><span>Total Budget</span><span>$45.2M</span></li>
+                <li><span>Actual Cost</span><span>$42.8M</span></li>
+                <li><span>Variance</span><span>+5.3%</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-chart-simple"></i> Real-time analytics | Data based on 200+ employee records | Last updated: Today
+    </footer>
+</div>
+
+<script>
+    // ==================== LOGIN SYSTEM ====================
+    let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    let currentUserName = localStorage.getItem('currentUserName') || '';
+    
+    function showDashboard() {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('dashboardPage').classList.add('active');
+        document.getElementById('userNameDisplay').innerText = currentUserName;
+        document.getElementById('welcomeName').innerHTML = currentUserName;
+    }
+    
+    function showLogin() {
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('dashboardPage').classList.remove('active');
+    }
+    
+    function logout() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUserName');
+        isLoggedIn = false;
+        currentUserName = '';
+        showLogin();
+    }
+    
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMsg');
+        
+        if (email && password.length >= 3) {
+            currentUserName = email.split('@')[0];
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUserName', currentUserName);
+            isLoggedIn = true;
+            showDashboard();
+            initializeDashboard();
+            errorDiv.style.display = 'none';
+        } else {
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Please enter valid email and password';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+    });
+    
+    // ==================== DASHBOARD DATA ====================
+    const departments = ['UI/UX', 'Cloud', 'Software Dev', 'Support', 'QA', 'DevOps', 'Data Analytics'];
+    const countries = ['USA', 'UK', 'India'];
+    const projectTypes = ['Fixed', 'T&M'];
+    
+    let employeesData = [];
+    for (let i = 1; i <= 200; i++) {
+        employeesData.push({
+            id: `EMP${i}`,
+            department: departments[Math.floor(Math.random() * departments.length)],
+            clientCountry: countries[Math.floor(Math.random() * countries.length)],
+            projectType: projectTypes[Math.floor(Math.random() * 2)],
+            projectId: `PRJ${1000 + i}`,
+            projectName: `Project_${Math.floor(Math.random() * 50) + 1}`,
+            plannedHours: Math.floor(Math.random() * 1800 + 200),
+            actualHours: Math.floor(Math.random() * 2200 + 150),
+            billableFlag: Math.random() > 0.35 ? 'Yes' : 'No',
+            satisfaction: (Math.random() * 4 + 1).toFixed(1)
+        });
+    }
+    
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const monthlyBase = [2450, 2680, 3100, 2950, 3420, 3800];
+    
+    let countryChart, trendChart, pieChart;
+    
+    function getFilteredData() {
+        let dept = document.getElementById('deptFilter').value;
+        let client = document.getElementById('clientFilter').value;
+        let filtered = [...employeesData];
+        if (dept !== 'all') filtered = filtered.filter(d => d.department === dept);
+        if (client !== 'all') filtered = filtered.filter(d => d.clientCountry === client);
+        return filtered;
+    }
+    
+    function updateKPIs() {
+        const filtered = getFilteredData();
+        const total = filtered.length;
+        const billable = filtered.filter(d => d.billableFlag === 'Yes').length;
+        const billRate = total ? (billable / total * 100).toFixed(1) : 0;
+        const avgSat = total ? (filtered.reduce((a,b) => a + parseFloat(b.satisfaction), 0) / total).toFixed(1) : 0;
+        const attritionRate = (Math.random() * 8 + 12).toFixed(1);
+        
+        document.getElementById('kpiContainer').innerHTML = `
+            <div class="kpi-card"><div class="kpi-title"><i class="fas fa-rocket"></i> Active Projects</div><div class="kpi-value">${total}</div></div>
+            <div class="kpi-card"><div class="kpi-title"><i class="fas fa-chart-simple"></i> Billability Rate</div><div class="kpi-value">${billRate}%</div></div>
+            <div class="kpi-card"><div class="kpi-title"><i class="fas fa-user-slash"></i> Attrition Rate</div><div class="kpi-value">${attritionRate}%</div></div>
+            <div class="kpi-card"><div class="kpi-title"><i class="fas fa-smile"></i> Avg Satisfaction</div><div class="kpi-value">${avgSat}/5</div></div>
+        `;
+    }
+    
+    function updateCountryChart() {
+        const filtered = getFilteredData();
+        const countryMap = { USA: 0, UK: 0, India: 0 };
+        filtered.forEach(d => countryMap[d.clientCountry]++);
+        if (countryChart) countryChart.destroy();
+        const ctx = document.getElementById('countryChart').getContext('2d');
+        countryChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: Object.keys(countryMap), datasets: [{ label: 'Projects', data: Object.values(countryMap), backgroundColor: '#2a9d8f', borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    function updateTrendChart() {
+        const filtered = getFilteredData();
+        const multiplier = filtered.length / employeesData.length;
+        const trendData = monthlyBase.map(h => Math.floor(h * (0.6 + multiplier * 0.6)));
+        if (trendChart) trendChart.destroy();
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        trendChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: months, datasets: [{ label: 'Billable Hours', data: trendData, borderColor: '#0ff', fill: false, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    function updatePieChart() {
+        const filtered = getFilteredData();
+        const fixed = filtered.filter(d => d.projectType === 'Fixed').length;
+        const tm = filtered.filter(d => d.projectType === 'T&M').length;
+        if (pieChart) pieChart.destroy();
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: { labels: ['Fixed Price', 'Time & Material'], datasets: [{ data: [fixed, tm], backgroundColor: ['#48cae4', '#f4a261'] }] },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    function updateRiskTable() {
+        const filtered = getFilteredData();
+        const riskProjects = filtered.filter(d => ((d.actualHours - d.plannedHours) / d.plannedHours) * 100 > 10).slice(0, 8);
+        const tbody = document.getElementById('riskTableBody');
+        tbody.innerHTML = '';
+        riskProjects.forEach(proj => {
+            const overrun = ((proj.actualHours - proj.plannedHours) / proj.plannedHours * 100).toFixed(1);
+            tbody.innerHTML += `<tr><td style="color:#0ff;">${proj.projectId}</td><td>${proj.projectName}</td><td>${proj.clientCountry}</td><td>${proj.department}</td><td class="badge-risk">+${overrun}%</td></tr>`;
+        });
+        if (riskProjects.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No at-risk projects</td></tr>';
+    }
+    
+    function populateFilters() {
+        const deptSet = [...new Set(employeesData.map(d => d.department))];
+        const countrySet = [...new Set(employeesData.map(d => d.clientCountry))];
+        document.getElementById('deptFilter').innerHTML = '<option value="all">All Departments</option>' + deptSet.map(d => `<option value="${d}">${d}</option>`).join('');
+        document.getElementById('clientFilter').innerHTML = '<option value="all">All Clients</option>' + countrySet.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    
+    function refreshDashboard() {
+        if (!isLoggedIn) return;
+        updateKPIs();
+        updateCountryChart();
+        updateTrendChart();
+        updatePieChart();
+        updateRiskTable();
+    }
+    
+    function resetFilters() {
+        document.getElementById('deptFilter').value = 'all';
+        document.getElementById('clientFilter').value = 'all';
+        refreshDashboard();
+    }
+    
+    function initializeDashboard() {
+        populateFilters();
+        refreshDashboard();
+        document.getElementById('deptFilter').addEventListener('change', refreshDashboard);
+        document.getElementById('clientFilter').addEventListener('change', refreshDashboard);
+    }
+    
+    if (isLoggedIn) initializeDashboard();
+</script>
+</body>
+</html>
