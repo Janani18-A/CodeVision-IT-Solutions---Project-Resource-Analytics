@@ -92,4 +92,5 @@ A modern, responsive IT Operations Dashboard with secure authentication, real-ti
 ### Method 2: Clone Repository
 ```bash
 git clone https://github.com/Janani18-A/CodeVision-IT-Solutions---Project-Resource-Analytics.git
+```
 open index.html
